@@ -1,0 +1,19 @@
+<launch>
+    <arg name="joy_dev" default="/dev/input/js0" />
+
+    <node pkg="joy" type="joy_node" name="joy_node">
+        <param name="dev" value="$(arg joy_dev)" />
+        <param name="deadzone" value="0.05" />
+        
+    </node>
+
+    <node pkg="xbox_teleop" type="xbox_teleop" name="xbox_teleop" output="screen">
+        <param name="axis_linear" value="1" type="int"/>
+        <param name="axis_angular" value="0" type="int"/>
+
+        <param name="vel_linear" value="0.2" type="double"/>
+        <param name="vel_angular" value="0.5" type="double"/>
+        <param name="button" value="5" type="int"/>
+    </node>
+
+</launch>

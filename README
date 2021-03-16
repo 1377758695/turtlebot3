@@ -1,0 +1,46 @@
+/****author: 潘薇鸿****/
+/****update: 2020/08/18****/
+
+在自己的工作空间下调用catkin_make指令编译代码
+注1：turtlebot3_navigation包 与 turtlebot3_slam包均要求在python2.7环境下运行，否则命令会报错
+注2：xbox手柄控制需要自己先安装驱动，并确保/dev/input下能找到js0
+
+总开关
+[PC]roscore
+
+目标物体图像数据采集
+OpenCV VideoCapture 
+
+建图：
+[PC]roslaunch turtlebot3_slam turtlebot3_slam.launch 启动建图，用手柄控制扫描出完整地图
+[PC]rosrun map_server map_saver -f ~/map 保存所建地图
+
+测量坐标
+[PC]roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/pwh/map.yaml 地图上线
+[PC]rosrun get_location get_location
+坐标格式：(linear_x, linear_y, rotation_z, rotation_w)
+
+导航及识别：
+[PC]ssh连接TB
+[TB]roslaunch turtlebot3_bringup turtlebot3_robot.launch 机器人上线
+[TB]roslaunch usb_cam usb_cam.launch 开启相机
+[PC]roslaunch xbox_teleop xbox_teleop.launch 启动手柄遥控模块
+[PC]roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/pwh/map.yaml 地图上线
+[PC]rosrun get_location set_location  设置初始位姿
+[PC]rosrun find_drug_target VelocityControl 启动速度控制模块
+[PC]rosrun find_drug_target ImageViewer 启动识别模块
+[PC]rosrun navigation return_to_start 三段导航模块开启
+[PC]rosrun navigation get_to_destination 二段导航模块开启
+[PC]rosrun navigation get_to_drug_shelf  一段导航模块开启
+
+机器人紧急制动指令
+rostopic pub -1 /cmd_vel geometry_msgs/Twist '{}' 
+
+rqt命令可以查看节点之间的通信
+
+测量得到的相关数据
+起点:   16.36 -7.84-0.11 0.99(16.23 -7.74 -0.14 0.99)
+病房1: 20.86 -9.80 -0.79 0.61
+病房2: 21.54 -11.52 -0.80 0.60
+病房3: 19.45 -11.01 -0.82 0.57
+药房:   24.63 -12.27 0.99 0.15
